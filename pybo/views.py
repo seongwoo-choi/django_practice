@@ -1,8 +1,29 @@
+from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.utils import timezone
 from .forms import QuestionForm, AnswerForm
 from .models import Question
+import logging
+
+# 로그 생성
+logger = logging.getLogger()
+
+# 로그의 출력 기준 설정
+logger.setLevel(logging.INFO)
+
+# log 출력 형식
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# log 출력
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+logger.addHandler(stream_handler)
+
+# log를 파일에 출력
+file_handler = logging.FileHandler('my.log')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
 
 
 # Create your views here.
@@ -11,8 +32,24 @@ def index(request):
     """
     pybo 출력 목록
     """
+
+    # 입력 인자
+    # request.GET('page', '1') => page 파라미터가 없는 URL 을 위해 기본값으로 1을 지정
+    # localhost:8000/pybo/?page=1, page=1 인 값을 page 에 저장
+    # 페이지 초기값을 설정해주는 것
+    page = request.GET.get('page', '1')
+
+    # 조회
     question_list = Question.objects.order_by('-create_date')
-    context = {'question_list': question_list}
+
+    # 페이징 처리
+    # 페이지당 10개 씩 보여주기
+    paginator = Paginator(question_list, 10)
+    page_obj = paginator.get_page(page)
+
+    context = {'question_list': page_obj}
+
+    logger.info(page)
     return render(request, 'pybo/question_list.html', context)
 
 
