@@ -39,7 +39,7 @@ def index(request):
     # 페이지 초기값을 설정해주는 것
     page = request.GET.get('page', '1')
 
-    # 조회
+    # Question 데이터들을 create_date 열의 내림차순으로 정렬하여 조회한다.
     question_list = Question.objects.order_by('-create_date')
 
     # 페이징 처리
