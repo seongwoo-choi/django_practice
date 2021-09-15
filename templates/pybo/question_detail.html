@@ -43,7 +43,15 @@
                 </form>
             {% endif %}
         <div class="form-group">
-            <textarea class="form-control" name="content" id="content" rows="10"></textarea>
+            <textarea
+                    {% if not user.is_authenticated %}
+                    disabled
+                    {% endif %}
+                    class="form-control"
+                    name="content"
+                    id="content"
+                    rows="10"
+            ></textarea>
         </div>
         <input type="submit" value="답변 등록">
         </form>

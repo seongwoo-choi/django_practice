@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
@@ -61,6 +62,10 @@ def detail(request, question_id):
     context = {'question': question}
     return render(request, 'pybo/question_detail.html', context)
 
+
+# 아래 어노테이션을 통해 로그인이 되어 있는지를 우선 검사하여 오류를 방지한다.
+# 만약 로그아웃 상태에서 @login_required 어노테이션이 적용된 함수가 호출되면 자동으로 로그인 화면으로 이동하게 했다.
+@login_required(login_url='common:login')
 def answer_create(request, question_id):
     """
     pybo 답변 등록
@@ -70,6 +75,7 @@ def answer_create(request, question_id):
         form = AnswerForm(request.POST)
         if form.is_valid():
             answer = form.save(commit=False)
+            answer.author = request.user
             answer.create_date = timezone.now()
             answer.question = question
             answer.save()
@@ -85,8 +91,7 @@ def answer_create(request, question_id):
     # question.answer_set.create(content=request.POST.get('content'), create_date=timezone.now())
 
 
-
-
+@login_required(login_url='common:login')
 def question_create(request):
     """
     pybo 질문 등록
@@ -105,6 +110,7 @@ def question_create(request):
             # 임시 저장을 하는 이유는 폼으로 질문 데이터를 저장할 경우 Question 모델의 create_date 에 값이 설정되지 않아 오류가 발생하기 때문이다.
             # form 에는 subject, content 필드만 존재하고 create_date 필드는 없다.
             question = form.save(commit=False)
+            question.author = request.user
             question.create_date = timezone.now()
             question.save()
             return redirect('pybo:index')
