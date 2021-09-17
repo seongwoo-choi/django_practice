@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
@@ -121,4 +122,37 @@ def question_create(request):
     context = {'form': form}
     return render(request, 'pybo/question_form.html', context)
 
+@login_required(login_url='common:url')
+def question_modify(request, question_id):
+    """
+    pybo 질문 수정
+    """
+    question = get_object_or_404(Question, pk=question_id)
 
+    # 로그인한 유저와 질문을 등록한 유저가 같지 않을 때
+    if request.user != question.author:
+        messages.error(request, '수정권환이 없습니다.')
+        return redirect('pybo:detail', question_id=question.id)
+
+    # question_form.html 에서 저장하기 버튼이 클릭이 되면 question = get_object_or_404(Question, pk=question_id), request.method == 'POST' 내부 함수가 실행되면서
+    # pybo:detail 로 redirect 된다.
+    if request.method == "POST":
+        # form 에는 QuestioForm 의 필드값들 subject, content 의 값들이 실려서 저장되는데 그 값들은 POST 로 입력받은 값들이다.
+        # instance 매개변수에 question 을 지정하면 기존 값을 폼에 채울 수 있다.
+        # 그래서 form 에는 기존 값 question + POST 로 입력받은 content, subject 값이 추가된 값이다!!!!!
+        form = QuestionForm(request.POST, instance=question)
+        print(3)
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.modify_date = timezone.now()
+            # question.author = request.user
+            question.save()
+            print(question.content, question.subject, question.author, question.modify_date, question.create_date)
+            return redirect('pybo:detail', question_id=question.id)
+    else:
+        form = QuestionForm()
+
+    # question/modify/question_id 진입 시 => POST 요청이 아니기 때문에 question=get_object_or_404(Question, pk=question_id), form=QuestionForm() 실행되고
+    # context 에 빈 form 이 실려서 pybo/question_form.html 로 렌더가 된다.
+    context = {'form': form}
+    return render(request, 'pybo/question_form.html', context)
