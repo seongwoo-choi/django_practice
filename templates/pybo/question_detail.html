@@ -9,10 +9,10 @@
                 </div>
                 <div class="d-flex justify-content-end">
                     {% if question.modify_date %}
-                    <div class="badge badge-light p-2 text-black mx-3">
-                        <div class="mb-2">modified at</div>
-                        <div>{{ question.modify_date }}</div>
-                    </div>
+                        <div class="badge badge-light p-2 text-black mx-3">
+                            <div class="mb-2">modified at</div>
+                            <div>{{ question.modify_date }}</div>
+                        </div>
                     {% endif %}
                     <div class="badge text-black p-2 text">
                         <div class="mb-2">{{ question.author.username }}</div>
@@ -21,7 +21,9 @@
                 </div>
                 {% if request.user == question.author %}
                     <div class="my-3">
-                    <a href="{% url 'pybo:question_modify' question.id %}" class="btn btn-sm btn-outline-secondary">수정</a>
+                        <a href="{% url 'pybo:question_modify' question.id %}" class="btn btn-sm btn-outline-secondary">수정</a>
+                        <a href="#" class="delete btn btn-sm btn-outline-secondary"
+                           data-uri="{% url 'pybo:question_delete' question.id %}">삭제</a>
                     </div>
                 {% endif %}
             </div>
@@ -57,16 +59,28 @@
         <div class="form-group">
             <textarea
                     {% if not user.is_authenticated %}
-                    disabled
+                        disabled
                     {% endif %}
-                    class="form-control"
-                    name="content"
-                    id="content"
-                    rows="10"
+                        class="form-control"
+                        name="content"
+                        id="content"
+                        rows="10"
             ></textarea>
         </div>
         <input type="submit" value="답변 등록">
         </form>
     </div>
+{% endblock %}
+
+{% block scirpt %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(".delete").on('click', function () {
+                if (confirm("정말로 삭제하시겠습니까?")) {
+                    location.href = $(this).data('uri')
+                }
+            })
+        })
+    </script>
 {% endblock %}
 
