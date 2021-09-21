@@ -8,10 +8,10 @@
         {% include "form_errors.html" %}
         <div class="form-group">
             <label for="content">댓글내용</label>
-            <textarea class="form-control"name="content" id="content"
+            <textarea class="form-control my-2"name="content" id="content"
                       rows="3">{{ form.content.value|default_if_none:'' }}</textarea>
         </div>
-        <button type="submit" class="btn btn-primary">저장하기</button>
+        <button type="submit" class="btn btn-primary my-3">저장하기</button>
     </form>
 </div>
 {% endblock %}
